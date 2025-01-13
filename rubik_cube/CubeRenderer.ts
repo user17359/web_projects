@@ -1,4 +1,4 @@
-import { side } from "./Cube";
+import { Cube, side } from "./Cube";
 import * as THREE from 'three'
 
 export class CubeRenderer{
@@ -13,7 +13,9 @@ export class CubeRenderer{
             [side.yellow, new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} )],
             [side.orange, new THREE.MeshBasicMaterial( {color: 0xfe8a18, side: THREE.DoubleSide} )],
         ]);
+    fillMaterial = new THREE.MeshBasicMaterial( {color: 0x000000, side: THREE.DoubleSide} );
     scene: THREE.Scene;
+    offset = 1.1; 
 
     constructor (scene: THREE.Scene){
         this.scene = scene;
@@ -24,5 +26,23 @@ export class CubeRenderer{
         plane.position.set(pos.x, pos.y, pos.z);
         plane.setRotationFromEuler (rot);
         this.scene.add(plane)
+    }
+
+    drawCube(cube: Cube){
+        for(let i = 0; i < cube.dim; i++){
+            for(let j = 0; j < cube.dim; j++){
+                this.drawSide(cube.front[i][j], new THREE.Vector3((i - 1) * this.offset, (j - 1) * this.offset, this.offset * cube.dim / 2), new THREE.Euler(0, 0, 0, "XYZ"))
+                this.drawSide(cube.back[i][j], new THREE.Vector3((i - 1) * this.offset, (j - 1) * this.offset, -this.offset * cube.dim / 2), new THREE.Euler(0, 0, 0, "XYZ"))
+                this.drawSide(cube.top[i][j], new THREE.Vector3((i - 1) * this.offset, this.offset * cube.dim / 2, (j - 1) * this.offset), new THREE.Euler(Math.PI / 2, 0, 0, "XYZ"))
+                this.drawSide(cube.bottom[i][j], new THREE.Vector3((i - 1) * this.offset, -this.offset * cube.dim / 2, (j - 1) * this.offset), new THREE.Euler(Math.PI / 2, 0, 0, "XYZ"))
+                this.drawSide(cube.right[i][j], new THREE.Vector3(this.offset * cube.dim / 2, (i - 1) * this.offset, (j - 1) * this.offset), new THREE.Euler(0, Math.PI / 2, 0, "XYZ"))
+                this.drawSide(cube.left[i][j], new THREE.Vector3(-this.offset * cube.dim / 2, (i - 1) * this.offset, (j - 1) * this.offset), new THREE.Euler(0, Math.PI / 2, 0, "XYZ"))
+            }
+        }
+
+        // Add fill
+        var fillGeometry = new THREE.BoxGeometry(this.offset * cube.dim - 0.01, this.offset * cube.dim - 0.01, this.offset * cube.dim - 0.01);
+        var fill = new THREE.Mesh(fillGeometry, this.fillMaterial);
+        this.scene.add(fill);
     }
 }
