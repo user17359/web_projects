@@ -33,10 +33,10 @@ export class CubeRenderer{
             for(let j = 0; j < cube.dim; j++){
                 this.drawSide(cube.front[i][j], new THREE.Vector3((i - 1) * this.offset, (j - 1) * this.offset, this.offset * cube.dim / 2), new THREE.Euler(0, 0, 0, "XYZ"))
                 this.drawSide(cube.back[i][j], new THREE.Vector3((i - 1) * this.offset, (j - 1) * this.offset, -this.offset * cube.dim / 2), new THREE.Euler(0, 0, 0, "XYZ"))
-                this.drawSide(cube.top[i][j], new THREE.Vector3((i - 1) * this.offset, this.offset * cube.dim / 2, (j - 1) * this.offset), new THREE.Euler(Math.PI / 2, 0, 0, "XYZ"))
-                this.drawSide(cube.bottom[i][j], new THREE.Vector3((i - 1) * this.offset, -this.offset * cube.dim / 2, (j - 1) * this.offset), new THREE.Euler(Math.PI / 2, 0, 0, "XYZ"))
-                this.drawSide(cube.right[i][j], new THREE.Vector3(this.offset * cube.dim / 2, (j - 1) * this.offset, (i - 1) * this.offset), new THREE.Euler(0, Math.PI / 2, 0, "XYZ"))
-                this.drawSide(cube.left[i][j], new THREE.Vector3(-this.offset * cube.dim / 2, (j - 1) * this.offset, (i - 1) * this.offset), new THREE.Euler(0, Math.PI / 2, 0, "XYZ"))
+                this.drawSide(cube.top[i][j], new THREE.Vector3((i - 1) * this.offset, this.offset * cube.dim / 2, -(j - 1) * this.offset), new THREE.Euler(Math.PI / 2, 0, 0, "XYZ"))
+                this.drawSide(cube.bottom[i][j], new THREE.Vector3((i - 1) * this.offset, -this.offset * cube.dim / 2, -(j - 1) * this.offset), new THREE.Euler(Math.PI / 2, 0, 0, "XYZ"))
+                this.drawSide(cube.right[i][j], new THREE.Vector3(this.offset * cube.dim / 2, (j - 1) * this.offset, -(i - 1) * this.offset), new THREE.Euler(0, Math.PI / 2, 0, "XYZ"))
+                this.drawSide(cube.left[i][j], new THREE.Vector3(-this.offset * cube.dim / 2, (j - 1) * this.offset, -(i - 1) * this.offset), new THREE.Euler(0, Math.PI / 2, 0, "XYZ"))
             }
         }
 

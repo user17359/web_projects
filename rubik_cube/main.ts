@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { CubeRenderer } from './CubeRenderer';
 import { Cube, side } from './Cube';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { faceDirection } from 'three/examples/jsm/nodes/Nodes.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -19,8 +20,9 @@ controls.mouseButtons = {LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ZOOM, RIGHT:
 const cube = new Cube();
 const cubeRender = new CubeRenderer(scene);
 
-cube.rotateRow(0, false);
-//cube.rotateColumnX(1, false);
+
+cube.rotateRow(2, true);
+//cube.rotateColumnX(2, true);
 cube.rotateColumnZ(2, false);
 
 camera.position.set( 5, 5, 5 );
