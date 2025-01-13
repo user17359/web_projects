@@ -16,27 +16,34 @@ export class CubeRenderer{
     fillMaterial = new THREE.MeshBasicMaterial( {color: 0x000000, side: THREE.DoubleSide} );
     scene: THREE.Scene;
     offset = 1.1; 
+    currentCubeGroup: THREE.Group | null = null;
 
     constructor (scene: THREE.Scene){
         this.scene = scene;
     }   
 
-    drawSide(type: side, pos: THREE.Vector3, rot: THREE.Euler){
+    drawSide(type: side, pos: THREE.Vector3, rot: THREE.Euler, parentGroup: THREE.Group){
         var plane = new THREE.Mesh( this.geometry, this.sideMaterials.get(type));
         plane.position.set(pos.x, pos.y, pos.z);
         plane.setRotationFromEuler (rot);
-        this.scene.add(plane)
+        parentGroup.add(plane);
     }
 
     drawCube(cube: Cube){
+        if (this.currentCubeGroup) {
+            this.scene.remove(this.currentCubeGroup);
+        }
+
+        const cubeGroup = new THREE.Group();
+
         for(let i = 0; i < cube.dim; i++){
             for(let j = 0; j < cube.dim; j++){
-                this.drawSide(cube.front[i][j], new THREE.Vector3((i - 1) * this.offset, (j - 1) * this.offset, this.offset * cube.dim / 2), new THREE.Euler(0, 0, 0, "XYZ"))
-                this.drawSide(cube.back[i][j], new THREE.Vector3((i - 1) * this.offset, (j - 1) * this.offset, -this.offset * cube.dim / 2), new THREE.Euler(0, 0, 0, "XYZ"))
-                this.drawSide(cube.top[i][j], new THREE.Vector3((i - 1) * this.offset, this.offset * cube.dim / 2, -(j - 1) * this.offset), new THREE.Euler(Math.PI / 2, 0, 0, "XYZ"))
-                this.drawSide(cube.bottom[i][j], new THREE.Vector3((i - 1) * this.offset, -this.offset * cube.dim / 2, -(j - 1) * this.offset), new THREE.Euler(Math.PI / 2, 0, 0, "XYZ"))
-                this.drawSide(cube.right[i][j], new THREE.Vector3(this.offset * cube.dim / 2, (j - 1) * this.offset, -(i - 1) * this.offset), new THREE.Euler(0, Math.PI / 2, 0, "XYZ"))
-                this.drawSide(cube.left[i][j], new THREE.Vector3(-this.offset * cube.dim / 2, (j - 1) * this.offset, -(i - 1) * this.offset), new THREE.Euler(0, Math.PI / 2, 0, "XYZ"))
+                this.drawSide(cube.front[i][j], new THREE.Vector3((i - 1) * this.offset, (j - 1) * this.offset, this.offset * cube.dim / 2), new THREE.Euler(0, 0, 0, "XYZ"), cubeGroup)
+                this.drawSide(cube.back[i][j], new THREE.Vector3((i - 1) * this.offset, (j - 1) * this.offset, -this.offset * cube.dim / 2), new THREE.Euler(0, 0, 0, "XYZ"), cubeGroup)
+                this.drawSide(cube.top[i][j], new THREE.Vector3((i - 1) * this.offset, this.offset * cube.dim / 2, -(j - 1) * this.offset), new THREE.Euler(Math.PI / 2, 0, 0, "XYZ"), cubeGroup)
+                this.drawSide(cube.bottom[i][j], new THREE.Vector3((i - 1) * this.offset, -this.offset * cube.dim / 2, -(j - 1) * this.offset), new THREE.Euler(Math.PI / 2, 0, 0, "XYZ"), cubeGroup)
+                this.drawSide(cube.right[i][j], new THREE.Vector3(this.offset * cube.dim / 2, (j - 1) * this.offset, -(i - 1) * this.offset), new THREE.Euler(0, Math.PI / 2, 0, "XYZ"), cubeGroup)
+                this.drawSide(cube.left[i][j], new THREE.Vector3(-this.offset * cube.dim / 2, (j - 1) * this.offset, -(i - 1) * this.offset), new THREE.Euler(0, Math.PI / 2, 0, "XYZ"), cubeGroup)
             }
         }
 
@@ -44,5 +51,9 @@ export class CubeRenderer{
         var fillGeometry = new THREE.BoxGeometry(this.offset * cube.dim - 0.01, this.offset * cube.dim - 0.01, this.offset * cube.dim - 0.01);
         var fill = new THREE.Mesh(fillGeometry, this.fillMaterial);
         this.scene.add(fill);
+
+        this.scene.add(cubeGroup);
+
+        this.currentCubeGroup = cubeGroup;
     }
 }
