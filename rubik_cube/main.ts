@@ -18,13 +18,19 @@ controls.mouseButtons = {LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ZOOM, RIGHT:
 
 const cube = new Cube();
 const cubeRender = new CubeRenderer(scene);
-cubeRender.drawCube(cube);
 
-camera.position.z = 10;
+cube.rotateRow(0, false);
+//cube.rotateColumnX(1, false);
+cube.rotateColumnZ(2, false);
+
+camera.position.set( 5, 5, 5 );
+camera.lookAt( scene.position );
 controls.update();
 
 function animate() {
     controls.update();
+    cubeRender.drawCube(cube);
+
 	renderer.render( scene, camera );
 }
 
