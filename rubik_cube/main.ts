@@ -4,6 +4,7 @@ import { Cube, side } from './Cube';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { faceDirection } from 'three/examples/jsm/nodes/Nodes.js';
 import { kind, ShuffleQueue } from './ShuffleQueue';
+import { DrawSteering } from './DrawSteering';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -20,17 +21,22 @@ controls.mouseButtons = {LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ZOOM, RIGHT:
 
 const cube = new Cube();
 const cubeRender = new CubeRenderer(scene);
+const drawSteering = new DrawSteering(scene);
+
+drawSteering.drawAll(cube.dim);
 
 const shuffleQueue = new ShuffleQueue(cube);
 
-//cube.rotateRow(2, true);
-//cube.rotateColumnX(2, true);
-//cube.rotateColumnZ(2, false);
+
 
 camera.position.set( 5, 5, 5 );
 camera.lookAt( scene.position );
 controls.update();
 
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
+
+//window.addEventListener('click', onMouseClick);
 
 shuffleQueue.addToQueue(kind.columnX, 2, true);
 shuffleQueue.addToQueue(kind.row, 2, true);
@@ -47,3 +53,21 @@ function animate() {
 renderer.setAnimationLoop( animate );
 
 await shuffleQueue.exhaustQueue();
+
+/*function onMouseClick(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObjects(planes);
+
+    if (intersects.length > 0) {
+        const intersectedPlane = intersects[0].object;
+
+        console.log(`Clicked plane ID: ${intersectedPlane.userData.id}`);
+        console.log(`Color: ${intersectedPlane.userData.color.toString(16)}`);
+
+        intersectedPlane.material.color.set(0xffffff);
+    }
+}**/
