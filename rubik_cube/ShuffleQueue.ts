@@ -1,4 +1,4 @@
-import { Cube } from "./Cube";
+import { Cube } from "./Cube"
 
 export enum kind {
     row,
@@ -7,17 +7,17 @@ export enum kind {
 }
 
 const delay = (delayInms) => {
-    return new Promise(resolve => setTimeout(resolve, delayInms));
-};
+    return new Promise(resolve => setTimeout(resolve, delayInms))
+}
 
 export class ShuffleQueue{
-    cube: Cube;
+    cube: Cube
 
-    delayTime = 1;
-    queue: Array<() => void> = [];
+    delayTime = 1
+    queue: Array<() => void> = []
     
     constructor(cube: Cube){
-        this.cube = cube;
+        this.cube = cube
     }
 
     addToQueue(k: kind, no: number, clockwise: boolean){
@@ -28,9 +28,9 @@ export class ShuffleQueue{
 
     async exhaustQueue(){
         while(this.queue.length != 0){
-            await delay(this.delayTime * 1000);
+            await delay(this.delayTime * 1000)
             let fun = this.queue.pop()
-            fun?.();
+            fun?.()
         }
     }
 }

@@ -12,20 +12,22 @@ enum steeringType{
 
 export class DrawSteering{
     
-     geometry = new THREE.PlaneGeometry( 0.5, 0.3 );
-    material = new THREE.MeshBasicMaterial( {color: 0x000000, side: THREE.DoubleSide} );
-    scene: THREE.Scene;
-    offset = 1.101; 
-    currentCubeGroup: THREE.Group | null = null;
+    geometry = new THREE.PlaneGeometry( 0.5, 0.3 )
+    material = new THREE.MeshBasicMaterial( {color: 0x000000, side: THREE.DoubleSide} )
+    scene: THREE.Scene
+    offset = 1.101
+    currentCubeGroup: THREE.Group | null = null
+    steeringPlanes: Array<THREE.Mesh> = [] 
 
     constructor (scene: THREE.Scene){
-        this.scene = scene;
+        this.scene = scene
     }   
 
     drawOne(type: steeringType, pos: THREE.Vector3, rot: THREE.Euler){
-        var plane = new THREE.Mesh( this.geometry, this.material);
-        plane.position.set(pos.x, pos.y, pos.z);
-        plane.setRotationFromEuler (rot);
+        var plane = new THREE.Mesh( this.geometry, this.material)
+        plane.position.set(pos.x, pos.y, pos.z)
+        plane.setRotationFromEuler (rot)
+        this.steeringPlanes.push(plane)
         this.scene.add(plane)
     }
 
