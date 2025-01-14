@@ -35,7 +35,7 @@ export class Cube {
             this.left[i] = []
             this.front[i] = []
             this.back[i] = []
-            for(let j = 0 j < this.dim j++){
+            for(let j = 0; j < this.dim; j++){
                 this.top[i][j] = side.white
                 this.bottom[i][j] = side.orange
                 this.right[i][j] = side.red

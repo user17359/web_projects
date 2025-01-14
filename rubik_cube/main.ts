@@ -4,7 +4,7 @@ import { Cube, side } from './Cube'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { faceDirection } from 'three/examples/jsm/nodes/Nodes.js'
 import { kind, ShuffleQueue } from './ShuffleQueue'
-import { DrawSteering } from './DrawSteering'
+import { DrawSteering, steeringType } from './DrawSteering'
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 )
@@ -36,11 +36,11 @@ controls.update()
 var raycaster = new THREE.Raycaster()
 var mouse = new THREE.Vector2()
 
-//window.addEventListener('click', onMouseClick)
+window.addEventListener('click', onMouseClick)
 
-shuffleQueue.addToQueue(kind.columnX, 2, true)
-shuffleQueue.addToQueue(kind.row, 2, true)
-shuffleQueue.addToQueue(kind.columnZ, 0, false)
+//shuffleQueue.addToQueue(kind.columnX, 2, true)
+//shuffleQueue.addToQueue(kind.row, 2, true)
+//shuffleQueue.addToQueue(kind.columnZ, 0, false)
 
 
 
@@ -54,20 +54,40 @@ renderer.setAnimationLoop( animate )
 
 await shuffleQueue.exhaustQueue()
 
-/*function onMouseClick(event) {
+function onMouseClick(event) {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
 
     raycaster.setFromCamera(mouse, camera)
 
-    const intersects = raycaster.intersectObjects(planes)
+    const intersects = raycaster.intersectObjects(drawSteering.steeringPlanes)
 
     if (intersects.length > 0) {
         const intersectedPlane = intersects[0].object
 
         console.log(`Clicked plane ID: ${intersectedPlane.userData.id}`)
-        console.log(`Color: ${intersectedPlane.userData.color.toString(16)}`)
+        console.log(`NO: ${intersectedPlane.userData.no}`)
 
-        intersectedPlane.material.color.set(0xffffff)
+        switch(intersectedPlane.userData.type) {
+            case steeringType.rowClockwise:
+                cube.rotateRow(intersectedPlane.userData.no, true)
+                break;
+            case steeringType.rowCounterclockwise:
+                cube.rotateRow(intersectedPlane.userData.no, false)
+                break;
+            case steeringType.columnXClockwise:
+                cube.rotateColumnX(intersectedPlane.userData.no, true)
+                break;
+            case steeringType.columnXCounterclockwise:
+                cube.rotateColumnX(intersectedPlane.userData.no, false)
+                break;
+            case steeringType.columnZClockwise:
+                cube.rotateColumnZ(intersectedPlane.userData.no, true)
+                break;
+            case steeringType.columnZCounterclockwise:
+                cube.rotateColumnZ(intersectedPlane.userData.no, false)
+                break;
+            
+        }
     }
-}**/
+}
