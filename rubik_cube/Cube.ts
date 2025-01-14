@@ -20,6 +20,8 @@ export class Cube {
     front: side[][]
     back: side[][]
 
+    allEqual = (matrix) => new Set(matrix.flat()).size === 1;
+
     constructor () {
         this.top = []
         this.bottom = []
@@ -43,6 +45,15 @@ export class Cube {
                 this.front[i][j] = side.blue
                 this.back[i][j] = side.yellow
             }
+        }
+    }
+
+    checkVictory(): boolean{
+        if(this.allEqual(this.top) && this.allEqual(this.bottom) && this.allEqual(this.right) && this.allEqual(this.left) && this.allEqual(this.front) && this.allEqual(this.back)){
+            return true;
+        }
+        else {
+            return false;
         }
     }
 

@@ -35,6 +35,8 @@ const cube = new Cube()
 const cubeRender = new CubeRenderer(scene)
 const drawSteering = new DrawSteering(scene)
 
+var interactable = false;
+
 drawSteering.drawAll(cube.dim)
 
 const shuffleQueue = new ShuffleQueue(cube)
@@ -50,11 +52,9 @@ var mouse = new THREE.Vector2()
 
 window.addEventListener('click', onMouseClick)
 
-//shuffleQueue.addToQueue(kind.columnX, 2, true)
-//shuffleQueue.addToQueue(kind.row, 2, true)
-//shuffleQueue.addToQueue(kind.columnZ, 0, false)
-
-
+shuffleQueue.addToQueue(kind.columnX, 2, true)
+shuffleQueue.addToQueue(kind.row, 2, true)
+shuffleQueue.addToQueue(kind.columnZ, 0, false)
 
 function animate() {
     controls.update()
@@ -64,44 +64,49 @@ function animate() {
 
 renderer.setAnimationLoop( animate )
 
-await shuffleQueue.exhaustQueue()
+await shuffleQueue.exhaustQueue().then(() => {interactable = true})
 
 function onMouseClick(event) {
-    listener.context.resume();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+    if(interactable){
+        listener.context.resume();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
 
-    raycaster.setFromCamera(mouse, camera)
+        raycaster.setFromCamera(mouse, camera)
 
-    const intersects = raycaster.intersectObjects(drawSteering.steeringPlanes)
+        const intersects = raycaster.intersectObjects(drawSteering.steeringPlanes)
 
-    if (intersects.length > 0) {
-        const intersectedPlane = intersects[0].object
+        if (intersects.length > 0) {
+            const intersectedPlane = intersects[0].object
 
-        console.log(`Clicked plane ID: ${intersectedPlane.userData.id}`)
-        console.log(`NO: ${intersectedPlane.userData.no}`)
+            console.log(`Clicked plane ID: ${intersectedPlane.userData.id}`)
+            console.log(`NO: ${intersectedPlane.userData.no}`)
 
-        switch(intersectedPlane.userData.type) {
-            case steeringType.rowClockwise:
-                cube.rotateRow(intersectedPlane.userData.no, true)
-                break;
-            case steeringType.rowCounterclockwise:
-                cube.rotateRow(intersectedPlane.userData.no, false)
-                break;
-            case steeringType.columnXClockwise:
-                cube.rotateColumnX(intersectedPlane.userData.no, true)
-                break;
-            case steeringType.columnXCounterclockwise:
-                cube.rotateColumnX(intersectedPlane.userData.no, false)
-                break;
-            case steeringType.columnZClockwise:
-                cube.rotateColumnZ(intersectedPlane.userData.no, false)
-                break;
-            case steeringType.columnZCounterclockwise:
-                cube.rotateColumnZ(intersectedPlane.userData.no, true)
-                break;
-            
+            switch(intersectedPlane.userData.type) {
+                case steeringType.rowClockwise:
+                    cube.rotateRow(intersectedPlane.userData.no, true)
+                    break;
+                case steeringType.rowCounterclockwise:
+                    cube.rotateRow(intersectedPlane.userData.no, false)
+                    break;
+                case steeringType.columnXClockwise:
+                    cube.rotateColumnX(intersectedPlane.userData.no, true)
+                    break;
+                case steeringType.columnXCounterclockwise:
+                    cube.rotateColumnX(intersectedPlane.userData.no, false)
+                    break;
+                case steeringType.columnZClockwise:
+                    cube.rotateColumnZ(intersectedPlane.userData.no, false)
+                    break;
+                case steeringType.columnZCounterclockwise:
+                    cube.rotateColumnZ(intersectedPlane.userData.no, true)
+                    break;
+                
+            }
+            sound.play()
+            if(cube.checkVictory()){
+                console.log("Victory royale!");
+            }
         }
-        sound.play()
     }
 }
