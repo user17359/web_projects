@@ -12,15 +12,19 @@ const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.inner
 const listener = new THREE.AudioListener();
 camera.add( listener );
 
-const sound = new THREE.Audio( listener );
+const clickSound = new THREE.Audio( listener );
+const winSound = new THREE.Audio( listener );
 
 scene.background = new THREE.Color( 0xd3d3ff )
 
 const audioLoader = new THREE.AudioLoader();
 audioLoader.load( 'sounds/click.wav', function( buffer ) {
-    console.log("Sound loaded")
-	sound.setBuffer( buffer );
-	sound.setVolume( 1 );
+	clickSound.setBuffer( buffer );
+	clickSound.setVolume( 1 );
+});
+audioLoader.load( 'sounds/win.wav', function( buffer ) {
+	winSound.setBuffer( buffer );
+	winSound.setVolume( 1 );
 });
 
 const renderer = new THREE.WebGLRenderer()
@@ -103,9 +107,14 @@ function onMouseClick(event) {
                     break;
                 
             }
-            sound.play()
+            
             if(cube.checkVictory()){
-                console.log("Victory royale!");
+                interactable = false;
+                console.log("Victory royale!")
+                winSound.play()
+            }
+            else{
+                clickSound.play()
             }
         }
     }
