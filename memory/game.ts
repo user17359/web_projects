@@ -1,10 +1,13 @@
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
-const rows = 4;
-const cols = 4;
-const cellWidth = canvas.width / cols;
-const cellHeight = canvas.height / rows;
+var rows = 2;
+var cols = 2;
+var cellWidth = canvas.width / cols;
+var cellHeight = canvas.height / rows;
+
+var level = 0;
+const limit = 2;
 
 const cardImages = [
     'images/image1.jpg', 'images/image1.jpg',
@@ -17,20 +20,14 @@ const cardImages = [
     'images/image8.jpg', 'images/image8.jpg'
 ];
 
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
+function shuffle(array, pairs) {
+    let selected = array.slice(0, pairs * 2)
+    for (let i = selected.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+        [selected[i], selected[j]] = [selected[j], selected[i]];
     }
+    return selected;
 }
-
-shuffle(cardImages);
-
-const cards = cardImages.map((src, index) => ({
-    src,
-    isFlipped: false,
-    position: index
-}));
 
 let firstCard = null;
 let secondCard = null;
@@ -73,7 +70,7 @@ function drawRect(x, y, width, height) {
 }
 
 // Draw cards with question marks
-function drawCards() {
+function drawCards(cards) {
     ctx.font = '40px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -99,39 +96,72 @@ function drawCards() {
     }
 }
 
-canvas.addEventListener('click', (event) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+function initializeGame(){
+    let usedImages = shuffle(cardImages, 2**(level + 1));
+    const cards = usedImages.map((src, index) => ({
+        src,
+        isFlipped: false,
+        position: index
+    }));
+    drawGrid();
+    drawCards(cards);
 
-    const col = Math.floor(x / cellWidth);
-    const row = Math.floor(y / cellHeight);
-    const index = row * cols + col;
-
-    if (!cards[index].isFlipped && (firstCard === null || secondCard === null)) {
-        cards[index].isFlipped = true;
-        drawCards();
-
-        if (firstCard === null) {
-            firstCard = index;
-        } else {
-            secondCard = index;
-
-            if (cards[firstCard].src === cards[secondCard].src) {
-                firstCard = null;
-                secondCard = null;
+    canvas.addEventListener('click', (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+    
+        const col = Math.floor(x / cellWidth);
+        const row = Math.floor(y / cellHeight);
+        const index = row * cols + col;
+    
+        if (!cards[index].isFlipped && (firstCard === null || secondCard === null)) {
+            cards[index].isFlipped = true;
+            drawCards(cards);
+    
+            if (firstCard === null) {
+                firstCard = index;
             } else {
-                setTimeout(() => {
-                    cards[firstCard].isFlipped = false;
-                    cards[secondCard].isFlipped = false;
+                secondCard = index;
+    
+                if (cards[firstCard].src === cards[secondCard].src) {
                     firstCard = null;
                     secondCard = null;
-                    drawCards();
-                }, 1000);
+
+                    if (cards.every(card => card.isFlipped)) {
+                        setTimeout(() => {
+                            if (level < limit) {
+                                level +=1 ;
+                                if(level == 1){
+                                    rows = 2;
+                                    cols = 4;
+                                }
+                                else{
+                                    rows = 4;
+                                    cols = 4;
+                                }
+                                cellWidth = canvas.width / cols;
+                                cellHeight = canvas.height / rows;
+                                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                initializeGame();
+                                alert('Gratulaje! Teraz kolejny poziom ^^');
+                            } else {
+                                alert('Gratulacje gra ukończona!');
+                            }
+                        }, 1000);
+                    }
+                } else {
+                    setTimeout(() => {
+                        cards[firstCard].isFlipped = false;
+                        cards[secondCard].isFlipped = false;
+                        firstCard = null;
+                        secondCard = null;
+                        drawCards(cards);
+                    }, 1000);
+                }
             }
         }
-    }
-});
+    });
+}
 
-drawGrid();
-drawCards();
+initializeGame()
