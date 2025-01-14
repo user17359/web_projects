@@ -5,6 +5,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { faceDirection } from 'three/examples/jsm/nodes/Nodes.js'
 import { kind, ShuffleQueue } from './ShuffleQueue'
 import { DrawSteering, steeringType } from './DrawSteering'
+import { Leaderboard } from './Leaderboard'
+import { Timer } from './Timer'
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 )
@@ -44,7 +46,8 @@ var interactable = false;
 drawSteering.drawAll(cube.dim)
 
 const shuffleQueue = new ShuffleQueue(cube)
-
+const timer = new Timer();
+const leaderboard = new Leaderboard()
 
 
 camera.position.set( 5, 5, 5 )
@@ -68,7 +71,7 @@ function animate() {
 
 renderer.setAnimationLoop( animate )
 
-await shuffleQueue.exhaustQueue().then(() => {interactable = true})
+await shuffleQueue.exhaustQueue().then(() => {interactable = true; timer.startTimer()})
 
 function onMouseClick(event) {
     if(interactable){
@@ -82,10 +85,6 @@ function onMouseClick(event) {
 
         if (intersects.length > 0) {
             const intersectedPlane = intersects[0].object
-
-            console.log(`Clicked plane ID: ${intersectedPlane.userData.id}`)
-            console.log(`NO: ${intersectedPlane.userData.no}`)
-
             switch(intersectedPlane.userData.type) {
                 case steeringType.rowClockwise:
                     cube.rotateRow(intersectedPlane.userData.no, true)
@@ -109,9 +108,11 @@ function onMouseClick(event) {
             }
             
             if(cube.checkVictory()){
+                timer.stopTimer();
                 interactable = false;
                 console.log("Victory royale!")
                 winSound.play()
+                leaderboard.showLeaderboard("Miau", timer.currentTime/1000)
             }
             else{
                 clickSound.play()
