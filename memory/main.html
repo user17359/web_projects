@@ -35,9 +35,62 @@
             background: #a536ff;
         }
 
+        #leaderboard {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				background: #8989ff;
+				color: white;
+				padding: 20px;
+				border-radius: 10px;
+				text-align: center;
+				z-index: 100;
+				width: 60vb;
+			}
+
+			#leaderboard table {
+				margin: 20px auto;
+				border-collapse: collapse;
+				width: 100%;
+			}
+
+			#leaderboard th, #leaderboard td {
+				border: 1px solid white;
+				padding: 10px;
+			}
+
+			#play-again {
+				background: #8e04ff;
+				color: white;
+				padding: 10px 20px;
+				border-radius: 10px;
+				width: 40vb;
+				cursor: pointer;
+			}
+
+			#play-again:hover {
+				background: #a536ff;
+			}
     </style>
 </head>
 <body>
+    <div id="leaderboard" style="display: none;">
+        <h1>Najlepsze wyniki</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Miejsce</th>
+                    <th>Gracz</th>
+                    <th>Wynik</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+            </tbody>
+        </table>
+        <button id="play-again">Jeszcze raz!</button>
+    </div>
+
     <div id="column">
         <h1>Znajdź pary!</h1>
         <button id="voice">
