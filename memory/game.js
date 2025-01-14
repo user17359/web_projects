@@ -5,6 +5,7 @@ var Leaderboard = /** @class */ (function () {
             { name: "Gracz2", score: 28 },
             { name: "Gracz3", score: 14 },
         ];
+        this.reshuffle = function () { reset(); };
     }
     Leaderboard.prototype.showLeaderboard = function (playerName, playerScore) {
         var _this = this;
@@ -223,6 +224,16 @@ function onCardsSelected(cards, first, second) {
             drawCards(cards);
         }, 1000);
     }
+}
+function reset() {
+    rows = 2;
+    cols = 2;
+    cellWidth = canvas.width / cols;
+    cellHeight = canvas.height / rows;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    level = 0;
+    moveCounter = 0;
+    initializeGame();
 }
 var voiceButton = document.getElementById('voice');
 voiceButton.onclick = function () {

@@ -5,7 +5,7 @@ class Leaderboard{
         { name: "Gracz3", score: 14 },
     ];
 
-     reshuffle: () => {};
+     reshuffle = () => {reset()};
 
     showLeaderboard(playerName, playerScore) {
         this.leaderboardData.push({ name: playerName, score: playerScore });
@@ -34,6 +34,18 @@ class Leaderboard{
             document.getElementById("leaderboard")!.style.display = "none";
         };
     }
+}
+
+function preloadImages(imageSources: string[]): Promise<HTMLImageElement[]> {
+    const promises = imageSources.map(src => {
+        return new Promise<HTMLImageElement>((resolve, reject) => {
+            const img = new Image();
+            img.src = src;
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+        });
+    });
+    return Promise.all(promises);
 }
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
@@ -104,9 +116,8 @@ let firstCard: number | null = null;
 let secondCard: number | null = null;
 
 function drawGrid() {
-    ctx!.strokeStyle = '#000'; // Grid line color
-    ctx!.lineWidth = 1; // Grid line width
-
+    ctx!.strokeStyle = '#000';
+    ctx!.lineWidth = 1;
     for (let i = 0; i <= cols; i++) {
         ctx!.beginPath();
         ctx!.moveTo(i * cellWidth, 0);
@@ -122,7 +133,7 @@ function drawGrid() {
     }
 
     const columnLabels = ['A', 'B', 'C', 'D'];
-    ctx!.fillStyle = '#000'; // Text color
+    ctx!.fillStyle = '#000';
     ctx!.font = '20px Arial';
     for (let i = 0; i < cols; i++) {
         ctx!.fillText(columnLabels[i], (i + 0.5) * cellWidth - 10, 20);
@@ -134,13 +145,12 @@ function drawGrid() {
 }
 
 function drawRect(x, y, width, height) {
-    ctx!.fillStyle = '#d3d3ff'; // Card color
-    ctx!.fillRect(x, y, width, height); // Draw the rectangle
-    ctx!.strokeStyle = '#000'; // Card border color
-    ctx!.strokeRect(x, y, width, height); // Draw the border
+    ctx!.fillStyle = '#d3d3ff';
+    ctx!.fillRect(x, y, width, height);
+    ctx!.strokeStyle = '#000';
+    ctx!.strokeRect(x, y, width, height);
 }
 
-// Draw cards with question marks
 function drawCards(cards) {
     ctx!.font = '40px Arial';
     ctx!.textAlign = 'center';
@@ -149,75 +159,76 @@ function drawCards(cards) {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
             const index = row * cols + col;
-            const x = col * cellWidth + (cellWidth - 200) / 2; // Center the card
-            const y = row * cellHeight + (cellHeight - 100) / 2; // Center the card
-            drawRect(x, y, 200, 100); // Draw the card
+            const x = col * cellWidth + (cellWidth - 200) / 2;
+            const y = row * cellHeight + (cellHeight - 100) / 2;
+            drawRect(x, y, 200, 100);
             
             if (cards[index].isFlipped) {
                 const img = new Image();
                 img.src = cards[index].src;
                 img.onload = () => {
-                    ctx!.drawImage(img, x, y, 200, 100); // Draw the image on the card
+                    ctx!.drawImage(cards[index].src, x, y, 200, 100);
                 };
             } else {
                 ctx!.fillStyle = '#000'; // Text color
-                ctx!.fillText('?', x + 100, y + 50); // Draw the question mark
+                ctx!.fillText('?', x + 100, y + 50);
             }
         }
     }
 }
 
-function initializeGame(){
-    let usedImages = shuffle(cardImages, 2**(level + 1));
-    const cards = usedImages.map((src, index) => ({
-        src,
-        isFlipped: false,
-        position: index
-    }));
-    drawGrid();
-    drawCards(cards);
+function initializeGame() {
+    const usedImages = shuffle(cardImages, 2 ** (level + 1));
+    preloadImages(usedImages).then(images => {
+        const cards = usedImages.map((src, index) => ({
+            src: images[index],
+            isFlipped: false,
+            position: index
+        }));
 
-    canvas.addEventListener('click', (event) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-    
-        const col = Math.floor(x / cellWidth);
-        const row = Math.floor(y / cellHeight);
-        const index = row * cols + col;
-    
-        if (!cards[index].isFlipped && (firstCard === null || secondCard === null)) {
-            cards[index].isFlipped = true;
-            drawCards(cards);
-    
-            if (firstCard === null) {
-                firstCard = index;
-            } else {
-                secondCard = index;
-    
-                onCardsSelected(cards, firstCard, secondCard);
-            }
-        }
-    });
-
-    recognition.onresult = function(event) {
-        var command = event.results[0][0].transcript;
-        console.log(command);
-    
-        let alpha1 = identifiers.get(command[0])
-        let alpha2 = identifiers.get(command[3])
-        let pic1 = (parseInt(command[1]) - 1) * cols + alpha1!
-        let pic2 = (parseInt(command[4]) - 1) * cols + alpha2!
-
-        cards[pic1].isFlipped = true;
-        cards[pic2].isFlipped = true;
+        drawGrid();
         drawCards(cards);
 
-    
-        onCardsSelected(cards, pic1, pic2)
-        console.log('Confidence: ' + event.results[0][0].confidence);
-    }
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
 
+            const col = Math.floor(x / cellWidth);
+            const row = Math.floor(y / cellHeight);
+            const index = row * cols + col;
+
+            if (!cards[index].isFlipped && (firstCard === null || secondCard === null)) {
+                cards[index].isFlipped = true;
+                drawCards(cards);
+
+                if (firstCard === null) {
+                    firstCard = index;
+                } else {
+                    secondCard = index;
+
+                    onCardsSelected(cards, firstCard, secondCard);
+                }
+            }
+        });
+
+        recognition.onresult = function(event) {
+            var command = event.results[0][0].transcript;
+            console.log(command);
+
+            let alpha1 = identifiers.get(command[0]);
+            let alpha2 = identifiers.get(command[3]);
+            let pic1 = (parseInt(command[1]) - 1) * cols + alpha1!;
+            let pic2 = (parseInt(command[4]) - 1) * cols + alpha2!;
+
+            cards[pic1].isFlipped = true;
+            cards[pic2].isFlipped = true;
+            drawCards(cards);
+
+            onCardsSelected(cards, pic1, pic2);
+            console.log('Confidence: ' + event.results[0][0].confidence);
+        };
+    });
 }
 
 function onCardsSelected(cards, first: number, second: number){
@@ -258,6 +269,17 @@ function onCardsSelected(cards, first: number, second: number){
             drawCards(cards);
         }, 1000);
     }
+}
+
+function reset () {
+    rows = 2;
+    cols = 2;
+    cellWidth = canvas.width / cols;
+    cellHeight = canvas.height / rows;
+    ctx!.clearRect(0, 0, canvas.width, canvas.height);
+    level = 0;
+    moveCounter = 0;
+    initializeGame();
 }
 
 const voiceButton = document.getElementById('voice');
