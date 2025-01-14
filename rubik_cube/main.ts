@@ -9,7 +9,19 @@ import { DrawSteering, steeringType } from './DrawSteering'
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 )
 
+const listener = new THREE.AudioListener();
+camera.add( listener );
+
+const sound = new THREE.Audio( listener );
+
 scene.background = new THREE.Color( 0xd3d3ff )
+
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load( 'sounds/click.wav', function( buffer ) {
+    console.log("Sound loaded")
+	sound.setBuffer( buffer );
+	sound.setVolume( 1 );
+});
 
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize( window.innerWidth, window.innerHeight )
@@ -55,6 +67,7 @@ renderer.setAnimationLoop( animate )
 await shuffleQueue.exhaustQueue()
 
 function onMouseClick(event) {
+    listener.context.resume();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
 
@@ -89,5 +102,6 @@ function onMouseClick(event) {
                 break;
             
         }
+        sound.play()
     }
 }
