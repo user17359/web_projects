@@ -20,14 +20,32 @@
         #game{
             background: #aeaefd;
         }
+
+        #voice {
+				background: #8e04ff;
+				color: white;
+				padding: 10px 20px;
+				border-radius: 10px;
+				width: 25vb;
+                margin-bottom: 15px;
+				cursor: pointer;
+        }
+
+        #voice:hover {
+            background: #a536ff;
+        }
+
     </style>
 </head>
 <body>
     <div id="column">
         <h1>Znajdź pary!</h1>
-        <canvas id="game" width="1400" height="800">
+        <button id="voice">
+            Wybieranie głosowe
+        </button>
+        <canvas id="game" width="1400" height="700">
         </canvas>
-        <script src="game.ts"></script>
+        <script src="game.js"></script>
     </div>
 </body>
 </html>
