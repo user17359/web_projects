@@ -13,7 +13,7 @@ const delay = (delayInms) => {
 export class ShuffleQueue{
     cube: Cube
 
-    delayTime = 1
+    delayTime = 0.3
     queue: Array<() => void> = []
     
     constructor(cube: Cube){
@@ -34,9 +34,35 @@ export class ShuffleQueue{
         }
     }
 
-    getQueue(){
-        this.addToQueue(kind.columnX, 2, true)
-        this.addToQueue(kind.row, 2, true)
-        this.addToQueue(kind.columnZ, 0, false)
+    getRandomInt(max) {
+        return Math.floor(Math.random() * max);
+    }
+
+    getQueue(numberOfShuffles = 3){
+        for(let i = 0; i < numberOfShuffles; i++){
+            const randpmKind = this.getRandomInt(6)
+            const randomNo = this.getRandomInt(3)
+
+            switch (randpmKind){
+                case 0:
+                    this.addToQueue(kind.row, randomNo, true)
+                    break;
+                case 1:
+                    this.addToQueue(kind.row, randomNo, false)
+                    break;
+                case 2:
+                    this.addToQueue(kind.columnX, randomNo, true)
+                    break;
+                case 3:
+                    this.addToQueue(kind.columnX, randomNo, false)
+                    break;
+                case 4:
+                    this.addToQueue(kind.columnZ, randomNo, true)
+                    break;
+                case 5:
+                    this.addToQueue(kind.columnZ, randomNo, false)
+                    break;
+            }
+        }
     }
 }
