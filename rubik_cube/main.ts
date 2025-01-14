@@ -82,10 +82,10 @@ function onMouseClick(event) {
                 cube.rotateColumnX(intersectedPlane.userData.no, false)
                 break;
             case steeringType.columnZClockwise:
-                cube.rotateColumnZ(intersectedPlane.userData.no, true)
+                cube.rotateColumnZ(intersectedPlane.userData.no, false)
                 break;
             case steeringType.columnZCounterclockwise:
-                cube.rotateColumnZ(intersectedPlane.userData.no, false)
+                cube.rotateColumnZ(intersectedPlane.userData.no, true)
                 break;
             
         }

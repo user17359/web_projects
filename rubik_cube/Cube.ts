@@ -46,164 +46,101 @@ export class Cube {
         }
     }
 
-    rotateRow(no: number, clockwise: boolean){
-        var temp: side[] = []
-       
-        const res = Array.from({ length: this.dim }, () => Array(this.dim).fill(null))
+    private getRow(face: side[][], row: number): side[] {
+        return face[row].slice();
+    }
+    
+    private setRow(face: side[][], row: number, values: side[]) {
+        face[row] = values.slice();
+    }
 
-        if(clockwise){
-            for(let i = 0; i < this.dim; i++){
-                temp[i] = this.front[i][no]
-                this.front[i][no] = this.left[i][no]
-                this.left[i][no] = this.back[i][no]
-                this.back[i][no] = this.right[i][no]
-                this.right[i][no] = temp[i]
-                if(no == 0){
-                    for(let j = 0; j < this.dim; j++){
-                        res[this.dim - j - 1][i] = this.bottom[i][j]
-                    }
-                }
-                else if(no == this.dim - 1){
-                    for(let j = 0; j < this.dim; j++){
-                        res[this.dim - j - 1][i] = this.top[i][j]
-                    }
-                }
-            }
-        }
-        else{
-            for(let i = 0; i < this.dim; i++){
-                temp[i] = this.front[i][no]
-                this.front[i][no] = this.right[i][no]
-                this.right[i][no] = this.back[i][no]
-                this.back[i][no] = this.left[i][no]
-                this.left[i][no] = temp[i]
-                if(no == 0){
-                    for(let j = 0; j < this.dim; j++){
-                        res[j][this.dim - i - 1] = this.bottom[i][j]
-                    }
-                }
-                else if(no == this.dim - 1){
-                    for(let j = 0; j < this.dim; j++){
-                        res[j][this.dim - i - 1] = this.top[i][j]
-                    }
+    private getColumn(face: side[][], col: number): side[] {
+        return face.map(row => row[col]);
+    }
+    
+    private setColumn(face: side[][], col: number, values: side[]) {
+        face.forEach((row, i) => (row[col] = values[i]));
+    }
+
+    private rotateFace(face: side[][], clockwise: boolean): side[][] {
+        const dim = face.length;
+        const newFace = Array.from({ length: dim }, () => Array(dim).fill(null));
+    
+        for (let i = 0; i < dim; i++) {
+            for (let j = 0; j < dim; j++) {
+                if (clockwise) {
+                    newFace[j][dim - i - 1] = face[i][j];
+                } else {
+                    newFace[dim - j - 1][i] = face[i][j];
                 }
             }
         }
-        if(no == 0){
-            for (let i = 0; i < this.dim; i++) {
-                this.bottom[i] = res[i].slice()
-            }
+    
+        return newFace;
+    }
+
+    rotateRow(no: number, clockwise: boolean){
+        const temp = this.getRow(this.front, no);
+
+        if (clockwise) {
+            this.setRow(this.front, no, this.getRow(this.left, no).reverse());
+            this.setRow(this.left, no, this.getRow(this.back, no));
+            this.setRow(this.back, no, this.getRow(this.right, no).reverse());
+            this.setRow(this.right, no, temp);
+        } else {
+            this.setRow(this.front, no, this.getRow(this.right, no));
+            this.setRow(this.right, no, this.getRow(this.back, no).reverse());
+            this.setRow(this.back, no, this.getRow(this.left, no));
+            this.setRow(this.left, no, temp.reverse());
         }
-        else if(no == this.dim - 1){
-            for(let i = 0; i < this.dim; i++){
-                this.top[i] = res[i].slice()
-            }
+
+        if (no === 0) {
+            this.bottom = this.rotateFace(this.bottom, clockwise);
+        } else if (no === this.dim - 1) {
+            this.top = this.rotateFace(this.top, clockwise);
         }
     }
 
     rotateColumnX(no: number, clockwise: boolean){
-        var temp: side[] = []
-        const res = Array.from({ length: this.dim }, () => Array(this.dim).fill(null))
-        if(clockwise){
-            for(let i = 0; i < this.dim; i++){
-                temp[i] = this.top[no][i]
-                this.top[no][i] = this.front[no][i]
-                this.front[no][i] = this.bottom[no][i]
-                this.bottom[no][i] = this.back[no][i]
-                this.back[no][i] = temp[i]
-                if(no == 0){
-                    for(let j = 0; j < this.dim; j++){
-                        res[j][this.dim - i - 1] = this.left[i][j]
-                    }
-                }
-                else if(no == this.dim - 1){
-                    for(let j = 0; j < this.dim; j++){
-                        res[j][this.dim - i - 1] = this.right[i][j]
-                    }
-                }
-            }
+        const temp = this.getColumn(this.top, no);
+        if (clockwise) {
+            this.setColumn(this.top, no, this.getColumn(this.front, no));
+            this.setColumn(this.front, no, this.getColumn(this.bottom, no).reverse());
+            this.setColumn(this.bottom, no, this.getColumn(this.back, no));
+            this.setColumn(this.back, no, temp.reverse());
+        } else {
+            this.setColumn(this.top, no, this.getColumn(this.back, no).reverse());
+            this.setColumn(this.back, no, this.getColumn(this.bottom, no));
+            this.setColumn(this.bottom, no, this.getColumn(this.front, no).reverse());
+            this.setColumn(this.front, no, temp);
         }
-        else{
-            for(let i = 0; i < this.dim; i++){
-                temp[i] = this.top[no][i]
-                this.top[no][i] = this.back[no][i]
-                this.back[no][i] = this.bottom[no][i]
-                this.bottom[no][i] = this.front[no][i]
-                this.front[no][i] = temp[i]
-                if(no == 0){
-                    for(let j = 0; j < this.dim; j++){
-                        res[this.dim - j - 1][i] = this.left[i][j]
-                    }
-                }
-                else if(no == this.dim - 1){
-                    for(let j = 0; j < this.dim; j++){
-                        res[this.dim - j - 1][i] = this.right[i][j]
-                    }
-                }
-            }
-        }
-        if(no == 0){
-            for (let i = 0; i < this.dim; i++) {
-                this.left[i] = res[i].slice()
-            }
-        }
-        else if(no == this.dim - 1){
-            for(let i = 0; i < this.dim; i++){
-                this.right[i] = res[i].slice()
-            }
+    
+        if (no === 0) {
+            this.left = this.rotateFace(this.left, !clockwise);
+        } else if (no === this.dim - 1) {
+            this.right = this.rotateFace(this.right, !clockwise);
         }
     }
 
     rotateColumnZ(no: number, clockwise: boolean){
-        var temp: side[] = []
-        const res = Array.from({ length: this.dim }, () => Array(this.dim).fill(null))
-        if(clockwise){
-            for(let i = 0; i < this.dim; i++){
-                temp[i] = this.top[this.dim - i - 1][no]
-                this.top[this.dim - i - 1][no] = this.right[no][i]
-                this.right[no][i] = this.bottom[this.dim - i - 1][no]
-                this.bottom[this.dim - i - 1][no] = this.left[no][i]
-                this.left[no][i] = temp[i]
-                if(no == 0){
-                    for(let j = 0; j < this.dim; j++){
-                        res[this.dim - j - 1][i] = this.front[i][j]
-                    }
-                }
-                else if(no == this.dim - 1){
-                    for(let j = 0; j < this.dim; j++){
-                        res[this.dim - j - 1][i] = this.back[i][j]
-                    }
-                }
-            }
+        const temp = this.getRow(this.top, no);
+
+        if (clockwise) {
+            this.setRow(this.top, no, this.getColumn(this.left, no));
+            this.setColumn(this.left, no, this.getRow(this.bottom, no).reverse());
+            this.setRow(this.bottom, no, this.getColumn(this.right, no));
+            this.setColumn(this.right, no, temp.reverse());
+        } else {
+            this.setRow(this.top, no, this.getColumn(this.right, no).reverse());
+            this.setColumn(this.right, no, this.getRow(this.bottom, no));
+            this.setRow(this.bottom, no, this.getColumn(this.left, no).reverse());
+            this.setColumn(this.left, no, temp);
         }
-        else{
-            for(let i = 0; i < this.dim; i++){
-                temp[i] = this.top[i][no]
-                this.top[i][no] = this.left[no][i]
-                this.left[no][i] = this.bottom[i][no]
-                this.bottom[i][no] = this.right[no][i]
-                this.right[no][i] = temp[i]
-                if(no == 0){
-                    for(let j = 0; j < this.dim; j++){
-                        res[j][this.dim - i - 1] = this.front[i][j]
-                    }
-                }
-                else if(no == this.dim - 1){
-                    for(let j = 0; j < this.dim; j++){
-                        res[j][this.dim - i - 1] = this.back[i][j]
-                    }
-                }
-            }
-        }
-        if(no == 0){
-            for (let i = 0; i < this.dim; i++) {
-                this.front[i] = res[i].slice()
-            }
-        }
-        else if(no == this.dim - 1){
-            for(let i = 0; i < this.dim; i++){
-                this.back[i] = res[i].slice()
-            }
+
+        if (no === 0) {
+            this.front = this.rotateFace(this.front, !clockwise);
+        } else if (no === this.dim - 1) {
+            this.back = this.rotateFace(this.back, !clockwise);
         }
     }
 }
