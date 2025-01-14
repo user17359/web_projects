@@ -33,4 +33,10 @@ export class ShuffleQueue{
             fun?.()
         }
     }
+
+    getQueue(){
+        this.addToQueue(kind.columnX, 2, true)
+        this.addToQueue(kind.row, 2, true)
+        this.addToQueue(kind.columnZ, 0, false)
+    }
 }

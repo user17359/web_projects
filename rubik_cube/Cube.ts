@@ -154,4 +154,17 @@ export class Cube {
             this.back = this.rotateFace(this.back, !clockwise);
         }
     }
+
+    reset(){
+        for(let i = 0; i < this.dim; i++){
+            for(let j = 0; j < this.dim; j++){
+                this.top[i][j] = side.white
+                this.bottom[i][j] = side.orange
+                this.right[i][j] = side.red
+                this.left[i][j] = side.green
+                this.front[i][j] = side.blue
+                this.back[i][j] = side.yellow
+            }
+        }
+    } 
 }

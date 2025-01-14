@@ -5,6 +5,8 @@ export class Leaderboard{
         { name: "Gracz3", score: 30 },
     ];
 
+     reshuffle: () => {};
+
     showLeaderboard(playerName, playerScore) {
         this.leaderboardData.push({ name: playerName, score: playerScore });
 
@@ -30,6 +32,7 @@ export class Leaderboard{
         document.getElementById("leaderboard")!.style.display = "block";
 
         document.getElementById("play-again")!.onclick = () => {
+            this.reshuffle();
             document.getElementById("leaderboard")!.style.display = "none";
         };
     }

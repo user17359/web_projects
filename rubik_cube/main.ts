@@ -48,7 +48,7 @@ drawSteering.drawAll(cube.dim)
 const shuffleQueue = new ShuffleQueue(cube)
 const timer = new Timer();
 const leaderboard = new Leaderboard()
-
+leaderboard.reshuffle = shuffleUp;
 
 camera.position.set( 5, 5, 5 )
 camera.lookAt( scene.position )
@@ -59,9 +59,11 @@ var mouse = new THREE.Vector2()
 
 window.addEventListener('click', onMouseClick)
 
-shuffleQueue.addToQueue(kind.columnX, 2, true)
-shuffleQueue.addToQueue(kind.row, 2, true)
-shuffleQueue.addToQueue(kind.columnZ, 0, false)
+document.getElementById("reshuffle")!.onclick = () => {
+    cube.reset();
+    shuffleUp();
+};
+
 
 function animate() {
     controls.update()
@@ -71,7 +73,7 @@ function animate() {
 
 renderer.setAnimationLoop( animate )
 
-await shuffleQueue.exhaustQueue().then(() => {interactable = true; timer.startTimer()})
+await shuffleUp()
 
 function onMouseClick(event) {
     if(interactable){
@@ -119,4 +121,10 @@ function onMouseClick(event) {
             }
         }
     }
+}
+
+async function shuffleUp(){
+    interactable = false;
+    shuffleQueue.getQueue()
+    await shuffleQueue.exhaustQueue().then(() => {interactable = true; timer.startTimer()})
 }
