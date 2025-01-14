@@ -1,8 +1,8 @@
 export class Leaderboard{
     leaderboardData = [
-        { name: "Gracz1", score: 100 },
-        { name: "Gracz2", score: 50 },
-        { name: "Gracz3", score: 30 },
+        { name: "Gracz1", score: 50 },
+        { name: "Gracz2", score: 10 },
+        { name: "Gracz3", score: 5 },
     ];
 
      reshuffle: () => {};
@@ -18,13 +18,11 @@ export class Leaderboard{
         leaderboardBody!.innerHTML = "";
 
         this.leaderboardData.forEach((entry, index) => {
-            const minutes = Math.floor(entry.score / 60);
-            const seconds = Math.floor(entry.score % 60);
             const row = document.createElement("tr");
             row.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${entry.name}</td>
-                <td>${minutes}:${seconds < 10 ? '0' : ''}${seconds}</td>
+                <td>${entry.score}</td>
             `;
             leaderboardBody!.appendChild(row);
         });

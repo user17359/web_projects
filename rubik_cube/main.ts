@@ -6,7 +6,7 @@ import { faceDirection } from 'three/examples/jsm/nodes/Nodes.js'
 import { kind, ShuffleQueue } from './ShuffleQueue'
 import { DrawSteering, steeringType } from './DrawSteering'
 import { Leaderboard } from './Leaderboard'
-import { Timer } from './Timer'
+import { Counter } from './Counter'
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 )
@@ -46,7 +46,7 @@ var interactable = false;
 drawSteering.drawAll(cube.dim)
 
 const shuffleQueue = new ShuffleQueue(cube)
-const timer = new Timer();
+const counter = new Counter();
 const leaderboard = new Leaderboard()
 leaderboard.reshuffle = shuffleUp;
 
@@ -108,13 +108,13 @@ function onMouseClick(event) {
                     break;
                 
             }
-            
+            counter.updateCounter();
             if(cube.checkVictory()){
-                timer.stopTimer();
+                counter.stopCounter();
                 interactable = false;
                 console.log("Victory royale!")
                 winSound.play()
-                leaderboard.showLeaderboard("Miau", timer.currentTime/1000)
+                leaderboard.showLeaderboard("Miau", counter.count)
             }
             else{
                 clickSound.play()
@@ -124,7 +124,8 @@ function onMouseClick(event) {
 }
 
 async function shuffleUp(){
+    counter.resetCounter()
     interactable = false;
     shuffleQueue.getQueue()
-    await shuffleQueue.exhaustQueue().then(() => {interactable = true; timer.startTimer()})
+    await shuffleQueue.exhaustQueue().then(() => {interactable = true; counter.startCounter()})
 }
