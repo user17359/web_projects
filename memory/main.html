@@ -22,59 +22,70 @@
         }
 
         #voice {
-				background: #8e04ff;
-				color: white;
-				padding: 10px 20px;
-				border-radius: 10px;
-				width: 25vb;
-                margin-bottom: 15px;
-				cursor: pointer;
+            width: 25vb;
+            margin-bottom: 15px;
         }
 
-        #voice:hover {
+        #leaderboard, #menu{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #8989ff;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 100;
+            width: 60vb;
+        }
+
+        #leaderboard table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #leaderboard th, #leaderboard td {
+            border: 1px solid white;
+            padding: 10px;
+        }
+
+        .button {
+            background: #8e04ff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            width: 40vb;
+            cursor: pointer;
+        }
+
+        button {
+            background: #8e04ff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            width: 40vb;
+            cursor: pointer;
+        }
+
+        button:hover {
             background: #a536ff;
         }
 
-        #leaderboard {
-				position: absolute;
-				top: 50%;
-				left: 50%;
-				transform: translate(-50%, -50%);
-				background: #8989ff;
-				color: white;
-				padding: 20px;
-				border-radius: 10px;
-				text-align: center;
-				z-index: 100;
-				width: 60vb;
-			}
-
-			#leaderboard table {
-				margin: 20px auto;
-				border-collapse: collapse;
-				width: 100%;
-			}
-
-			#leaderboard th, #leaderboard td {
-				border: 1px solid white;
-				padding: 10px;
-			}
-
-			#play-again {
-				background: #8e04ff;
-				color: white;
-				padding: 10px 20px;
-				border-radius: 10px;
-				width: 40vb;
-				cursor: pointer;
-			}
-
-			#play-again:hover {
-				background: #a536ff;
-			}
+        #menu button {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
+    <div id="menu" >
+        <h1>Wybierz talie</h1>
+        <button id="cats">Koty</button>
+        <button id="voivodships">Województwa</button>
+        <button id="faculties">Wydziały</button>
+    </div>
+
     <div id="leaderboard" style="display: none;">
         <h1>Najlepsze wyniki</h1>
         <table>

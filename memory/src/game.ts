@@ -53,14 +53,15 @@ const ctx = canvas!.getContext('2d');
 
 var rows = 2;
 var cols = 2;
-var cellWidth = canvas.width / cols;
-var cellHeight = canvas.height / rows;
+var cellWidth = canvas!.width / cols;
+var cellHeight = canvas!.height / rows;
 var moveCounter = 0;
+var startTime;
 
 var level = 0;
 const limit = 2;
 
-const cardImages = [
+const catImages = [
     'images/image1.jpg', 'images/image1.jpg',
     'images/image2.jpg', 'images/image2.jpg',
     'images/image3.jpg', 'images/image3.jpg',
@@ -71,13 +72,39 @@ const cardImages = [
     'images/image8.jpg', 'images/image8.jpg'
 ];
 
+const voivodImages = [
+    'images/voi1.png', 'images/voi1.png',
+    'images/voi2.png', 'images/voi2.png',
+    'images/voi3.png', 'images/voi3.png',
+    'images/voi4.png', 'images/voi4.png',
+    'images/voi5.png', 'images/voi5.png',
+    'images/voi6.png', 'images/voi6.png',
+    'images/voi7.png', 'images/voi7.png',
+    'images/voi8.png', 'images/voi8.png'
+];
+
+const facultiesImages = [
+    'images/fac1.png', 'images/fac1.png',
+    'images/fac2.jpg', 'images/fac2.jpg',
+    'images/fac3.png', 'images/fac3.png',
+    'images/fac4.jpg', 'images/fac4.jpg',
+    'images/fac5.png', 'images/fac5.png',
+    'images/fac6.png', 'images/fac6.png',
+    'images/fac7.png', 'images/fac7.png',
+    'images/fac8.png', 'images/fac8.png'
+];
+
+var cardImages;
+
+let leaderboard = new Leaderboard();
+
+// recognition definitions
+
 var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
 var SpeechGrammarList = SpeechGrammarList || window.webkitSpeechGrammarList
 var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
 
 var commands = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4"]
-
-let leaderboard = new Leaderboard();
 
 const identifiers = new Map([
     ["A", 0],
@@ -116,6 +143,8 @@ let firstCard: number | null = null;
 let secondCard: number | null = null;
 
 function drawGrid() {
+
+    // grid
     ctx!.strokeStyle = '#000';
     ctx!.lineWidth = 1;
     for (let i = 0; i <= cols; i++) {
@@ -132,6 +161,7 @@ function drawGrid() {
         ctx!.stroke();
     }
 
+    // labels
     const columnLabels = ['A', 'B', 'C', 'D'];
     ctx!.fillStyle = '#000';
     ctx!.font = '20px Arial';
@@ -164,13 +194,9 @@ function drawCards(cards) {
             drawRect(x, y, 200, 100);
             
             if (cards[index].isFlipped) {
-                const img = new Image();
-                img.src = cards[index].src;
-                img.onload = () => {
-                    ctx!.drawImage(cards[index].src, x, y, 200, 100);
-                };
+                ctx!.drawImage(cards[index].src, x, y, 200, 100);
             } else {
-                ctx!.fillStyle = '#000'; // Text color
+                ctx!.fillStyle = '#000';
                 ctx!.fillText('?', x + 100, y + 50);
             }
         }
@@ -181,6 +207,7 @@ function initializeGame() {
     const usedImages = shuffle(cardImages, 2 ** (level + 1));
     preloadImages(usedImages).then(images => {
         const cards = usedImages.map((src, index) => ({
+            code: src,
             src: images[index],
             isFlipped: false,
             position: index
@@ -189,6 +216,7 @@ function initializeGame() {
         drawGrid();
         drawCards(cards);
 
+        // on card clicked
         canvas.addEventListener('click', (event) => {
             const rect = canvas.getBoundingClientRect();
             const x = event.clientX - rect.left;
@@ -212,7 +240,9 @@ function initializeGame() {
             }
         });
 
+        // voice recognition commands
         recognition.onresult = function(event) {
+            console.log("result");
             var command = event.results[0][0].transcript;
             console.log(command);
 
@@ -233,10 +263,11 @@ function initializeGame() {
 
 function onCardsSelected(cards, first: number, second: number){
     moveCounter += 1;
-    if (cards[first].src === cards[second].src) {
+    // if cards match
+    if (cards[first].code === cards[second].code) {
         firstCard = null;
         secondCard = null;
-
+        // if level is complete
         if (cards.every(card => card.isFlipped)) {
             setTimeout(() => {
                 if (level < limit) {
@@ -255,7 +286,9 @@ function onCardsSelected(cards, first: number, second: number){
                     initializeGame();
                     alert('Gratulaje! Teraz kolejny poziom ^^');
                 } else {
-                    alert('Gratulacje gra ukończona!!!');
+                    const d = new Date();
+                    let endTime = d.getTime();
+                    alert('Gratulacje gra ukończona!!! Czas '+ Math.floor((endTime - startTime)/1000) + "s");
                     leaderboard.showLeaderboard("PlayerHere", moveCounter);
                 }
             }, 1000);
@@ -271,6 +304,7 @@ function onCardsSelected(cards, first: number, second: number){
     }
 }
 
+// after player pressed reset on leaderboard
 function reset () {
     rows = 2;
     cols = 2;
@@ -282,6 +316,8 @@ function reset () {
     initializeGame();
 }
 
+
+// button for voice
 const voiceButton = document.getElementById('voice');
 
 voiceButton!.onclick = function() {
@@ -289,4 +325,35 @@ voiceButton!.onclick = function() {
     console.log('Ready to receive a command.');
 }
 
-initializeGame()
+
+// setup of menu buttons
+const menu = document.getElementById('menu');
+const catsButton = document.getElementById('cats');
+
+catsButton!.onclick = function() {
+    const d = new Date();
+    startTime = d.getTime();
+    cardImages = catImages;
+    initializeGame();
+    menu!.style.display = "none";
+}
+
+const voivodButton = document.getElementById('voivodships');
+
+voivodButton!.onclick = function() {
+    const d = new Date();
+    startTime = d.getTime();
+    cardImages = voivodImages;
+    initializeGame();
+    menu!.style.display = "none";
+}
+
+const facultiesButton = document.getElementById('faculties');
+
+facultiesButton!.onclick = function() {
+    const d = new Date();
+    startTime = d.getTime();
+    cardImages = facultiesImages;
+    initializeGame();
+    menu!.style.display = "none";
+}

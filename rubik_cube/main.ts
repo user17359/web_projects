@@ -114,7 +114,7 @@ function onMouseClick(event) {
                 interactable = false;
                 console.log("Victory royale!")
                 winSound.play()
-                leaderboard.showLeaderboard("Miau", counter.count)
+                leaderboard.showLeaderboard("PlayerHere", counter.count)
             }
             else{
                 clickSound.play()

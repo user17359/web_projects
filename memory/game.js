@@ -27,6 +27,17 @@ var Leaderboard = /** @class */ (function () {
     };
     return Leaderboard;
 }());
+function preloadImages(imageSources) {
+    var promises = imageSources.map(function (src) {
+        return new Promise(function (resolve, reject) {
+            var img = new Image();
+            img.src = src;
+            img.onload = function () { return resolve(img); };
+            img.onerror = reject;
+        });
+    });
+    return Promise.all(promises);
+}
 var canvas = document.getElementById('game');
 var ctx = canvas.getContext('2d');
 var rows = 2;
@@ -34,9 +45,10 @@ var cols = 2;
 var cellWidth = canvas.width / cols;
 var cellHeight = canvas.height / rows;
 var moveCounter = 0;
+var startTime;
 var level = 0;
 var limit = 2;
-var cardImages = [
+var catImages = [
     'images/image1.jpg', 'images/image1.jpg',
     'images/image2.jpg', 'images/image2.jpg',
     'images/image3.jpg', 'images/image3.jpg',
@@ -46,11 +58,33 @@ var cardImages = [
     'images/image7.jpg', 'images/image7.jpg',
     'images/image8.jpg', 'images/image8.jpg'
 ];
+var voivodImages = [
+    'images/voi1.png', 'images/voi1.png',
+    'images/voi2.png', 'images/voi2.png',
+    'images/voi3.png', 'images/voi3.png',
+    'images/voi4.png', 'images/voi4.png',
+    'images/voi5.png', 'images/voi5.png',
+    'images/voi6.png', 'images/voi6.png',
+    'images/voi7.png', 'images/voi7.png',
+    'images/voi8.png', 'images/voi8.png'
+];
+var facultiesImages = [
+    'images/fac1.png', 'images/fac1.png',
+    'images/fac2.jpg', 'images/fac2.jpg',
+    'images/fac3.png', 'images/fac3.png',
+    'images/fac4.jpg', 'images/fac4.jpg',
+    'images/fac5.png', 'images/fac5.png',
+    'images/fac6.png', 'images/fac6.png',
+    'images/fac7.png', 'images/fac7.png',
+    'images/fac8.png', 'images/fac8.png'
+];
+var cardImages;
+var leaderboard = new Leaderboard();
+// recognition definitions
 var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
 var SpeechGrammarList = SpeechGrammarList || window.webkitSpeechGrammarList;
 var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
 var commands = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4"];
-var leaderboard = new Leaderboard();
 var identifiers = new Map([
     ["A", 0],
     ["B", 1],
@@ -85,8 +119,9 @@ function shuffle(array, pairs) {
 var firstCard = null;
 var secondCard = null;
 function drawGrid() {
-    ctx.strokeStyle = '#000'; // Grid line color
-    ctx.lineWidth = 1; // Grid line width
+    // grid
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
     for (var i = 0; i <= cols; i++) {
         ctx.beginPath();
         ctx.moveTo(i * cellWidth, 0);
@@ -99,8 +134,9 @@ function drawGrid() {
         ctx.lineTo(canvas.width, i * cellHeight);
         ctx.stroke();
     }
+    // labels
     var columnLabels = ['A', 'B', 'C', 'D'];
-    ctx.fillStyle = '#000'; // Text color
+    ctx.fillStyle = '#000';
     ctx.font = '20px Arial';
     for (var i = 0; i < cols; i++) {
         ctx.fillText(columnLabels[i], (i + 0.5) * cellWidth - 10, 20);
@@ -110,86 +146,86 @@ function drawGrid() {
     }
 }
 function drawRect(x, y, width, height) {
-    ctx.fillStyle = '#d3d3ff'; // Card color
-    ctx.fillRect(x, y, width, height); // Draw the rectangle
-    ctx.strokeStyle = '#000'; // Card border color
-    ctx.strokeRect(x, y, width, height); // Draw the border
+    ctx.fillStyle = '#d3d3ff';
+    ctx.fillRect(x, y, width, height);
+    ctx.strokeStyle = '#000';
+    ctx.strokeRect(x, y, width, height);
 }
-// Draw cards with question marks
 function drawCards(cards) {
     ctx.font = '40px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (var row = 0; row < rows; row++) {
-        var _loop_1 = function (col) {
+        for (var col = 0; col < cols; col++) {
             var index = row * cols + col;
-            var x = col * cellWidth + (cellWidth - 200) / 2; // Center the card
-            var y = row * cellHeight + (cellHeight - 100) / 2; // Center the card
-            drawRect(x, y, 200, 100); // Draw the card
+            var x = col * cellWidth + (cellWidth - 200) / 2;
+            var y = row * cellHeight + (cellHeight - 100) / 2;
+            drawRect(x, y, 200, 100);
             if (cards[index].isFlipped) {
-                var img_1 = new Image();
-                img_1.src = cards[index].src;
-                img_1.onload = function () {
-                    ctx.drawImage(img_1, x, y, 200, 100); // Draw the image on the card
-                };
+                ctx.drawImage(cards[index].src, x, y, 200, 100);
             }
             else {
-                ctx.fillStyle = '#000'; // Text color
-                ctx.fillText('?', x + 100, y + 50); // Draw the question mark
+                ctx.fillStyle = '#000';
+                ctx.fillText('?', x + 100, y + 50);
             }
-        };
-        for (var col = 0; col < cols; col++) {
-            _loop_1(col);
         }
     }
 }
 function initializeGame() {
     var usedImages = shuffle(cardImages, Math.pow(2, (level + 1)));
-    var cards = usedImages.map(function (src, index) { return ({
-        src: src,
-        isFlipped: false,
-        position: index
-    }); });
-    drawGrid();
-    drawCards(cards);
-    canvas.addEventListener('click', function (event) {
-        var rect = canvas.getBoundingClientRect();
-        var x = event.clientX - rect.left;
-        var y = event.clientY - rect.top;
-        var col = Math.floor(x / cellWidth);
-        var row = Math.floor(y / cellHeight);
-        var index = row * cols + col;
-        if (!cards[index].isFlipped && (firstCard === null || secondCard === null)) {
-            cards[index].isFlipped = true;
-            drawCards(cards);
-            if (firstCard === null) {
-                firstCard = index;
-            }
-            else {
-                secondCard = index;
-                onCardsSelected(cards, firstCard, secondCard);
-            }
-        }
-    });
-    recognition.onresult = function (event) {
-        var command = event.results[0][0].transcript;
-        console.log(command);
-        var alpha1 = identifiers.get(command[0]);
-        var alpha2 = identifiers.get(command[3]);
-        var pic1 = (parseInt(command[1]) - 1) * cols + alpha1;
-        var pic2 = (parseInt(command[4]) - 1) * cols + alpha2;
-        cards[pic1].isFlipped = true;
-        cards[pic2].isFlipped = true;
+    preloadImages(usedImages).then(function (images) {
+        var cards = usedImages.map(function (src, index) { return ({
+            code: src,
+            src: images[index],
+            isFlipped: false,
+            position: index
+        }); });
+        drawGrid();
         drawCards(cards);
-        onCardsSelected(cards, pic1, pic2);
-        console.log('Confidence: ' + event.results[0][0].confidence);
-    };
+        // on card clicked
+        canvas.addEventListener('click', function (event) {
+            var rect = canvas.getBoundingClientRect();
+            var x = event.clientX - rect.left;
+            var y = event.clientY - rect.top;
+            var col = Math.floor(x / cellWidth);
+            var row = Math.floor(y / cellHeight);
+            var index = row * cols + col;
+            if (!cards[index].isFlipped && (firstCard === null || secondCard === null)) {
+                cards[index].isFlipped = true;
+                drawCards(cards);
+                if (firstCard === null) {
+                    firstCard = index;
+                }
+                else {
+                    secondCard = index;
+                    onCardsSelected(cards, firstCard, secondCard);
+                }
+            }
+        });
+        // voice recognition commands
+        recognition.onresult = function (event) {
+            console.log("result");
+            var command = event.results[0][0].transcript;
+            console.log(command);
+            var alpha1 = identifiers.get(command[0]);
+            var alpha2 = identifiers.get(command[3]);
+            var pic1 = (parseInt(command[1]) - 1) * cols + alpha1;
+            var pic2 = (parseInt(command[4]) - 1) * cols + alpha2;
+            cards[pic1].isFlipped = true;
+            cards[pic2].isFlipped = true;
+            drawCards(cards);
+            onCardsSelected(cards, pic1, pic2);
+            console.log('Confidence: ' + event.results[0][0].confidence);
+        };
+    });
 }
 function onCardsSelected(cards, first, second) {
     moveCounter += 1;
-    if (cards[first].src === cards[second].src) {
+    // if cards match
+    if (cards[first].code === cards[second].code) {
         firstCard = null;
         secondCard = null;
+        // if level is complete
         if (cards.every(function (card) { return card.isFlipped; })) {
             setTimeout(function () {
                 if (level < limit) {
@@ -209,7 +245,9 @@ function onCardsSelected(cards, first, second) {
                     alert('Gratulaje! Teraz kolejny poziom ^^');
                 }
                 else {
-                    alert('Gratulacje gra ukończona!!!');
+                    var d = new Date();
+                    var endTime = d.getTime();
+                    alert('Gratulacje gra ukończona!!! Czas ' + Math.floor((endTime - startTime) / 1000) + "s");
                     leaderboard.showLeaderboard("PlayerHere", moveCounter);
                 }
             }, 1000);
@@ -225,6 +263,7 @@ function onCardsSelected(cards, first, second) {
         }, 1000);
     }
 }
+// after player pressed reset on leaderboard
 function reset() {
     rows = 2;
     cols = 2;
@@ -235,9 +274,35 @@ function reset() {
     moveCounter = 0;
     initializeGame();
 }
+// button for voice
 var voiceButton = document.getElementById('voice');
 voiceButton.onclick = function () {
     recognition.start();
     console.log('Ready to receive a command.');
 };
-initializeGame();
+// setup of menu buttons
+var menu = document.getElementById('menu');
+var catsButton = document.getElementById('cats');
+catsButton.onclick = function () {
+    var d = new Date();
+    startTime = d.getTime();
+    cardImages = catImages;
+    initializeGame();
+    menu.style.display = "none";
+};
+var voivodButton = document.getElementById('voivodships');
+voivodButton.onclick = function () {
+    var d = new Date();
+    startTime = d.getTime();
+    cardImages = voivodImages;
+    initializeGame();
+    menu.style.display = "none";
+};
+var facultiesButton = document.getElementById('faculties');
+facultiesButton.onclick = function () {
+    var d = new Date();
+    startTime = d.getTime();
+    cardImages = facultiesImages;
+    initializeGame();
+    menu.style.display = "none";
+};
